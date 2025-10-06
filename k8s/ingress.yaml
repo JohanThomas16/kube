@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kube-credential-ingress
+  namespace: kube-credential
+  labels:
+    app: kube-credential
+    component: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: kube-credential.local
+    http:
+      paths:
+      - path: /api/issue(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: issuance-service
+            port:
+              number: 80
+      - path: /api/verify(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: verification-service
+            port:
+              number: 80
+      - path: /issue(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: issuance-service
+            port:
+              number: 80
+      - path: /verify(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: verification-service
+            port:
+              number: 80

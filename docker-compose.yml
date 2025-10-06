@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  issuance-service:
+    build:
+      context: ./services/issuance-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - WORKER_ID=issuance-worker-local
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - issuance-data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  verification-service:
+    build:
+      context: ./services/verification-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+      - WORKER_ID=verification-worker-local
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - verification-data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_ISSUANCE_API_URL=http://localhost:3001
+        - VITE_VERIFICATION_API_URL=http://localhost:3002
+    ports:
+      - "3000:80"
+    depends_on:
+      - issuance-service
+      - verification-service
+
+volumes:
+  issuance-data:
+  verification-data:
+
+networks:
+  default:
+    name: kube-credential-network

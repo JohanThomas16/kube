@@ -1,0 +1,30 @@
+{
+  "name": "kube-credential",
+  "version": "1.0.0",
+  "description": "Kube Credential assignment with microservices architecture",
+  "private": true,
+  "workspaces": [
+    "services/issuance-service",
+    "services/verification-service",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:services && npm run install:frontend",
+    "install:services": "cd services/issuance-service && npm install && cd ../verification-service && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev:issuance": "cd services/issuance-service && npm run dev",
+    "dev:verification": "cd services/verification-service && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:all": "npm run build:services && npm run build:frontend",
+    "build:services": "cd services/issuance-service && npm run build && cd ../verification-service && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test:all": "npm run test:services",
+    "test:services": "cd services/issuance-service && npm test && cd ../verification-service && npm test",
+    "docker:build": "docker build -t kube-credential/issuance-service ./services/issuance-service && docker build -t kube-credential/verification-service ./services/verification-service",
+    "k8s:apply": "kubectl apply -f k8s/",
+    "k8s:delete": "kubectl delete -f k8s/"
+  },
+  "keywords": ["kubernetes", "microservices", "typescript", "react", "docker"],
+  "author": "Kube Credential Assignment",
+  "license": "MIT"
+}
